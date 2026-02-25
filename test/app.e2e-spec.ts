@@ -26,7 +26,9 @@ describe('VideosController (e2e)', () => {
   });
 
   it('/api/videos (GET) returns only the public contract sorted by hype desc', async () => {
-    const response = await request(app.getHttpServer()).get('/api/videos').expect(200);
+    const response = await request(app.getHttpServer())
+      .get('/api/videos')
+      .expect(200);
 
     const videos = response.body as VideoResponseContract[];
     expect(Array.isArray(videos)).toBe(true);
@@ -49,10 +51,14 @@ describe('VideosController (e2e)', () => {
   });
 
   it('applies hype=0 when comments are missing', async () => {
-    const response = await request(app.getHttpServer()).get('/api/videos').expect(200);
+    const response = await request(app.getHttpServer())
+      .get('/api/videos')
+      .expect(200);
     const videos = response.body as VideoResponseContract[];
 
-    const polemicaVideos = videos.filter((video) => video.title.includes('POL'));
+    const polemicaVideos = videos.filter((video) =>
+      video.title.includes('POL'),
+    );
     expect(polemicaVideos.length).toBe(2);
 
     for (const video of polemicaVideos) {
@@ -61,10 +67,14 @@ describe('VideosController (e2e)', () => {
   });
 
   it('applies hype=0 when views are zero', async () => {
-    const response = await request(app.getHttpServer()).get('/api/videos').expect(200);
+    const response = await request(app.getHttpServer())
+      .get('/api/videos')
+      .expect(200);
     const videos = response.body as VideoResponseContract[];
 
-    const zeroViewVideos = videos.filter((video) => video.title.includes('Hola Mundo'));
+    const zeroViewVideos = videos.filter((video) =>
+      video.title.includes('Hola Mundo'),
+    );
     expect(zeroViewVideos.length).toBe(2);
 
     for (const video of zeroViewVideos) {
