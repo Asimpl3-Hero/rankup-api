@@ -1,18 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class VideoResponseDto {
-  @ApiProperty({ example: 'https://via.placeholder.com/300x200' })
+  @ApiProperty({
+    description: 'URL de la miniatura del video',
+    example: 'https://via.placeholder.com/300x200',
+  })
   thumbnail!: string;
 
-  @ApiProperty({ example: 'NestJS en 10 minutos' })
+  @ApiProperty({
+    description: 'Titulo del video',
+    example: 'NestJS en 10 minutos',
+  })
   title!: string;
 
-  @ApiProperty({ example: 'MidudevFan' })
+  @ApiProperty({
+    description: 'Nombre del autor o canal',
+    example: 'MidudevFan',
+  })
   author!: string;
 
-  @ApiProperty({ example: 'Hace 2 meses' })
+  @ApiProperty({
+    description: 'Fecha publicada en formato relativo amigable',
+    example: 'Hace 2 meses',
+  })
   publishedAt!: string;
 
-  @ApiProperty({ example: 0.42 })
+  @ApiProperty({
+    description: 'Score calculado con reglas de negocio',
+    example: 0.42,
+  })
   hype!: number;
 }

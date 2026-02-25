@@ -1,5 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GetVideosUseCase } from '../application/get-videos.use-case';
 import { VideoResponseDto } from '../dto/video-response.dto';
 
@@ -11,6 +16,10 @@ export class VideosController {
   @Get()
   @ApiOperation({ summary: 'List videos processed for frontend consumption' })
   @ApiOkResponse({ type: VideoResponseDto, isArray: true })
+  @ApiInternalServerErrorResponse({
+    description:
+      'Error leyendo o parseando mock-youtube-api.json, o estructura invalida en items.',
+  })
   async getVideos(): Promise<VideoResponseDto[]> {
     return this.getVideosUseCase.execute();
   }
