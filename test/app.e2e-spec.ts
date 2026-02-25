@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { AppModule } from './../src/app.module';
 
 interface VideoResponseContract {
@@ -10,6 +12,40 @@ interface VideoResponseContract {
   author: string;
   publishedAt: string;
   hype: number;
+}
+
+interface MockVideoItem {
+  snippet?: {
+    title?: string;
+    channelTitle?: string;
+  };
+  statistics?: {
+    viewCount?: string;
+    commentCount?: string;
+  };
+}
+
+interface MockVideoResponse {
+  items: MockVideoItem[];
+}
+
+function getMockItems(): MockVideoItem[] {
+  const mockPath = path.resolve(process.cwd(), 'mock/mock-youtube-api.json');
+  const raw = readFileSync(mockPath, 'utf-8');
+  const parsed = JSON.parse(raw) as MockVideoResponse;
+  return parsed.items ?? [];
+}
+
+function toVideoKey(title: string, author: string): string {
+  return `${title}::${author}`;
+}
+
+function countByKey(keys: string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const key of keys) {
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
 }
 
 describe('VideosController (e2e)', () => {
@@ -51,33 +87,59 @@ describe('VideosController (e2e)', () => {
   });
 
   it('applies hype=0 when comments are missing', async () => {
+    const expectedKeys = getMockItems()
+      .filter((item) => item.statistics?.commentCount === undefined)
+      .map((item) =>
+        toVideoKey(item.snippet?.title ?? '', item.snippet?.channelTitle ?? ''),
+      );
+    const expectedCounts = countByKey(expectedKeys);
+
     const response = await request(app.getHttpServer())
       .get('/api/videos')
       .expect(200);
     const videos = response.body as VideoResponseContract[];
 
-    const polemicaVideos = videos.filter((video) =>
-      video.title.includes('POL'),
+    const matchingVideos = videos.filter((video) =>
+      expectedCounts.has(toVideoKey(video.title, video.author)),
     );
-    expect(polemicaVideos.length).toBe(2);
+    const actualCounts = countByKey(
+      matchingVideos.map((video) => toVideoKey(video.title, video.author)),
+    );
 
-    for (const video of polemicaVideos) {
+    for (const [key, count] of expectedCounts) {
+      expect(actualCounts.get(key) ?? 0).toBe(count);
+    }
+
+    for (const video of matchingVideos) {
       expect(video.hype).toBe(0);
     }
   });
 
   it('applies hype=0 when views are zero', async () => {
+    const expectedKeys = getMockItems()
+      .filter((item) => Number(item.statistics?.viewCount) === 0)
+      .map((item) =>
+        toVideoKey(item.snippet?.title ?? '', item.snippet?.channelTitle ?? ''),
+      );
+    const expectedCounts = countByKey(expectedKeys);
+
     const response = await request(app.getHttpServer())
       .get('/api/videos')
       .expect(200);
     const videos = response.body as VideoResponseContract[];
 
-    const zeroViewVideos = videos.filter((video) =>
-      video.title.includes('Hola Mundo'),
+    const matchingVideos = videos.filter((video) =>
+      expectedCounts.has(toVideoKey(video.title, video.author)),
     );
-    expect(zeroViewVideos.length).toBe(2);
+    const actualCounts = countByKey(
+      matchingVideos.map((video) => toVideoKey(video.title, video.author)),
+    );
 
-    for (const video of zeroViewVideos) {
+    for (const [key, count] of expectedCounts) {
+      expect(actualCounts.get(key) ?? 0).toBe(count);
+    }
+
+    for (const video of matchingVideos) {
       expect(video.hype).toBe(0);
     }
   });

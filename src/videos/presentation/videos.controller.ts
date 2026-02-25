@@ -18,7 +18,7 @@ export class VideosController {
   @ApiOkResponse({ type: VideoResponseDto, isArray: true })
   @ApiInternalServerErrorResponse({
     description:
-      'Error leyendo o parseando mock-youtube-api.json, o estructura invalida en items.',
+      'Error leyendo o parseando el archivo mock configurado, o estructura invalida en items.',
   })
   async getVideos(): Promise<VideoResponseDto[]> {
     return this.getVideosUseCase.execute();

@@ -25,7 +25,7 @@ export function formatPublishedAt(isoDate: string, now: Date = new Date()): stri
 
   const totalDays = Math.floor(totalHours / DAY_IN_HOURS);
   if (totalDays < MONTH_IN_DAYS) {
-    return formatAmount(totalDays, 'dia', 'dias');
+    return formatAmount(totalDays, 'día', 'días');
   }
 
   const totalMonths = Math.floor(totalDays / MONTH_IN_DAYS);

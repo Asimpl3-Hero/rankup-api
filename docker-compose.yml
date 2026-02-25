@@ -1,0 +1,11 @@
+services:
+  rankup-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      SWAGGER_PATH: api/docs
+      MOCK_YOUTUBE_FILE_PATH: mock/mock-youtube-api.json

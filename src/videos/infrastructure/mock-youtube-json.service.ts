@@ -5,7 +5,7 @@ import { YoutubeVideoItemRaw, YoutubeVideoListResponseRaw } from '../application
 
 @Injectable()
 export class MockYoutubeJsonService {
-  private readonly mockFilePath = path.resolve(process.cwd(), 'mock-youtube-api.json');
+  private readonly mockFilePath = this.resolveMockFilePath();
 
   async getVideos(): Promise<YoutubeVideoItemRaw[]> {
     const rawContent = await this.readMockFile();
@@ -22,7 +22,9 @@ export class MockYoutubeJsonService {
     try {
       return await readFile(this.mockFilePath, { encoding: 'utf-8' });
     } catch {
-      throw new InternalServerErrorException('Could not read mock-youtube-api.json file.');
+      throw new InternalServerErrorException(
+        `Could not read mock file at path "${this.mockFilePath}".`,
+      );
     }
   }
 
@@ -30,7 +32,20 @@ export class MockYoutubeJsonService {
     try {
       return JSON.parse(rawContent) as YoutubeVideoListResponseRaw;
     } catch {
-      throw new InternalServerErrorException('mock-youtube-api.json is not valid JSON.');
+      throw new InternalServerErrorException(
+        `Mock file at path "${this.mockFilePath}" is not valid JSON.`,
+      );
     }
+  }
+
+  private resolveMockFilePath(): string {
+    const configuredPath =
+      process.env.MOCK_YOUTUBE_FILE_PATH ?? 'mock/mock-youtube-api.json';
+
+    if (path.isAbsolute(configuredPath)) {
+      return configuredPath;
+    }
+
+    return path.resolve(process.cwd(), configuredPath);
   }
 }
