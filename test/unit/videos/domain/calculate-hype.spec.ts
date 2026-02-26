@@ -1,4 +1,4 @@
-import { calculateHype } from './calculate-hype';
+import { calculateHype } from '../../../../src/videos/domain/calculate-hype';
 
 describe('calculateHype', () => {
   it('calculates hype using (likes + comments) / views', () => {

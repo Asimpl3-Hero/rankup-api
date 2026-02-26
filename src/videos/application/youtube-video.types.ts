@@ -23,5 +23,5 @@ export interface YoutubeVideoSnippetRaw {
 export interface YoutubeVideoStatisticsRaw {
   viewCount?: string;
   likeCount?: string;
-  commentCount?: string;
+  commentCount?: string | null;
 }

@@ -14,6 +14,11 @@ interface VideoResponseContract {
   hype: number;
 }
 
+interface UploadMockResponseContract {
+  message: string;
+  itemsCount: number;
+}
+
 interface MockVideoItem {
   snippet?: {
     title?: string;
@@ -195,5 +200,71 @@ describe('VideosController (e2e)', () => {
     await app.init();
 
     await request(app.getHttpServer()).get('/api/videos').expect(500);
+  });
+
+  it('uploads a mock JSON file and uses it on GET /api/videos', async () => {
+    const uploadedMock = {
+      kind: 'youtube#videoListResponse',
+      items: [
+        {
+          id: 'video-1',
+          snippet: {
+            title: 'Tutorial de NestJS',
+            channelTitle: 'Channel A',
+            publishedAt: '2026-02-20T12:00:00.000Z',
+            thumbnails: { high: { url: 'https://example.com/1.jpg' } },
+          },
+          statistics: {
+            viewCount: '100',
+            likeCount: '20',
+            commentCount: '10',
+          },
+        },
+        {
+          id: 'video-2',
+          snippet: {
+            title: 'Video sin comentarios',
+            channelTitle: 'Channel B',
+            publishedAt: '2026-02-22T12:00:00.000Z',
+            thumbnails: { high: { url: 'https://example.com/2.jpg' } },
+          },
+          statistics: {
+            viewCount: '200',
+            likeCount: '100',
+          },
+        },
+      ],
+    };
+
+    const uploadResponse = await request(app.getHttpServer())
+      .post('/api/videos/mock')
+      .attach(
+        'file',
+        Buffer.from(JSON.stringify(uploadedMock), 'utf-8'),
+        'uploaded-mock.json',
+      )
+      .expect(201);
+
+    const uploadBody = uploadResponse.body as UploadMockResponseContract;
+    expect(uploadBody.message).toBe('Mock uploaded successfully.');
+    expect(uploadBody.itemsCount).toBe(2);
+
+    const videosResponse = await request(app.getHttpServer())
+      .get('/api/videos')
+      .expect(200);
+
+    const videos = videosResponse.body as VideoResponseContract[];
+    expect(videos).toHaveLength(2);
+    expect(videos[0].title).toBe('Tutorial de NestJS');
+    expect(videos[0].hype).toBeCloseTo(0.6);
+    expect(videos[1].title).toBe('Video sin comentarios');
+    expect(videos[1].hype).toBe(0);
+  });
+
+  it('returns 400 when uploaded mock file is invalid JSON', async () => {
+    await request(app.getHttpServer())
+      .post('/api/videos/mock')
+      .attach('file', Buffer.from('{ invalid json', 'utf-8'), 'broken.json')
+      .expect(400);
   });
 });

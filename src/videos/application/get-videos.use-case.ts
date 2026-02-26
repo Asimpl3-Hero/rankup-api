@@ -30,8 +30,7 @@ export class GetVideosUseCase {
         title,
         views,
         likes,
-        comments:
-          commentsRaw === undefined ? null : this.parseCount(commentsRaw),
+        comments: commentsRaw == null ? null : this.parseCount(commentsRaw),
       }),
     };
   }

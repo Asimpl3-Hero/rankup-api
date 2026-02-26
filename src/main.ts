@@ -24,16 +24,18 @@ async function bootstrap() {
   const port = resolvePort(process.env.PORT);
 
   app.setGlobalPrefix(apiPrefix, {
-    exclude: [
-      { method: RequestMethod.GET, path: '' },
-      { method: RequestMethod.GET, path: '/' },
-    ],
+    exclude: [{ method: RequestMethod.GET, path: 'health' }],
   });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle(swaggerTitle)
     .setDescription(swaggerDescription)
     .setVersion(swaggerVersion)
+    .addTag('app', 'Estado del servicio y rutas disponibles')
+    .addTag(
+      'videos',
+      'Consulta de videos transformados para frontend (hype calculado, fecha amigable y orden descendente por hype)',
+    )
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup(swaggerPath, app, swaggerDocument);

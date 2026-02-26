@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { YoutubeVideoItemRaw, YoutubeVideoListResponseRaw } from '../application/youtube-video.types';
@@ -6,8 +10,13 @@ import { YoutubeVideoItemRaw, YoutubeVideoListResponseRaw } from '../application
 @Injectable()
 export class MockYoutubeJsonService {
   private readonly mockFilePath = this.resolveMockFilePath();
+  private uploadedVideos: YoutubeVideoItemRaw[] | null = null;
 
   async getVideos(): Promise<YoutubeVideoItemRaw[]> {
+    if (this.uploadedVideos !== null) {
+      return this.uploadedVideos;
+    }
+
     const rawContent = await this.readMockFile();
     const parsedData = this.parseMockContent(rawContent);
 
@@ -16,6 +25,27 @@ export class MockYoutubeJsonService {
     }
 
     return parsedData.items;
+  }
+
+  setVideosFromRawContent(rawContent: string): number {
+    let parsedData: YoutubeVideoListResponseRaw;
+
+    try {
+      parsedData = JSON.parse(rawContent) as YoutubeVideoListResponseRaw;
+    } catch {
+      throw new BadRequestException(
+        'Uploaded file is not valid JSON.',
+      );
+    }
+
+    if (!Array.isArray(parsedData.items)) {
+      throw new BadRequestException(
+        'Uploaded JSON must contain a valid items array.',
+      );
+    }
+
+    this.uploadedVideos = parsedData.items;
+    return parsedData.items.length;
   }
 
   private async readMockFile(): Promise<string> {

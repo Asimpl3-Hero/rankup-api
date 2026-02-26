@@ -1,4 +1,4 @@
-import { formatPublishedAt } from './format-published-at';
+import { formatPublishedAt } from '../../../../src/videos/domain/format-published-at';
 
 describe('formatPublishedAt', () => {
   const now = new Date('2026-02-25T12:00:00.000Z');
