@@ -87,16 +87,26 @@ rankup-api/
         `-- videos/
 ```
 
-## :white_check_mark: Cobertura de tests
+## :white_check_mark: Cobertura de pruebas unitarias
 
-Resultado actual de `npm run test:cov`:
+Comando:
 
-- Statements: `99.4%`
+```bash
+npm run test:cov
+```
+
+Resultado actual (ultimo run local):
+
+- Statements: `99.41%`
 - Branches: `90.9%`
 - Functions: `100%`
-- Lines: `99.34%`
+- Lines: `99.35%`
 
-Cobertura objetivo cumplida (`>= 80%`).
+Notas:
+
+- Este reporte corresponde a pruebas unitarias (`test/unit`).
+- Las pruebas e2e se ejecutan por separado con `npm run test:e2e`.
+- Cobertura objetivo cumplida (`>= 80%`).
 
 ## :rocket: Ejecutar local
 
