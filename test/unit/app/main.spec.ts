@@ -58,7 +58,10 @@ describe('main bootstrap', () => {
 
     expect(create).toHaveBeenCalledTimes(1);
     expect(app.setGlobalPrefix).toHaveBeenCalledWith('api', {
-      exclude: [{ method: RequestMethod.GET, path: 'health' }],
+      exclude: [
+        { method: RequestMethod.GET, path: '' },
+        { method: RequestMethod.GET, path: 'health' },
+      ],
     });
     expect(app.listen).toHaveBeenCalledWith(3000);
     expect(setup).toHaveBeenCalledWith('api/docs', app, { openapi: '3.0.0' });

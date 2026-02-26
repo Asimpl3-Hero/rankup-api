@@ -5,4 +5,9 @@ describe('AppController', () => {
     const controller = new AppController();
     expect(controller.getHealth()).toEqual({ status: 'ok' });
   });
+
+  it('exposes root redirect handler', () => {
+    const controller = new AppController();
+    expect(controller.redirectToHealth()).toBeUndefined();
+  });
 });

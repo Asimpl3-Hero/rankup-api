@@ -24,7 +24,10 @@ async function bootstrap() {
   const port = resolvePort(process.env.PORT);
 
   app.setGlobalPrefix(apiPrefix, {
-    exclude: [{ method: RequestMethod.GET, path: 'health' }],
+    exclude: [
+      { method: RequestMethod.GET, path: '' },
+      { method: RequestMethod.GET, path: 'health' },
+    ],
   });
 
   const swaggerConfig = new DocumentBuilder()

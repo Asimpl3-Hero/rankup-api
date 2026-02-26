@@ -1,10 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Redirect } from '@nestjs/common';
+import {
+  ApiExcludeEndpoint,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('app')
-@Controller('health')
+@Controller()
 export class AppController {
-  @Get()
+  @Get('health')
   @ApiOperation({
     summary: 'Healthcheck del backend',
     description:
@@ -23,4 +28,9 @@ export class AppController {
       status: 'ok'
     };
   }
+
+  @Get()
+  @Redirect('/health', 302)
+  @ApiExcludeEndpoint()
+  redirectToHealth() {}
 }
