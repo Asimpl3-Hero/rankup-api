@@ -10,7 +10,9 @@ Backend en NestJS que procesa un mock tipo YouTube y entrega un contrato limpio 
 
 ## :dart: Que hace `GET /api/videos`
 
-`GET /api/videos` es el endpoint principal del reto.
+- Frontend: https://github.com/Asimpl3-Hero/rankup
+
+`GET /api/videos` es el endpoint principal del reto que consume el front.
 
 Hace todo este flujo:
 
