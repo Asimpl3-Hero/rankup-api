@@ -10,7 +10,7 @@ describe('formatPublishedAt', () => {
 
   it('returns days when diff is less than a month', () => {
     const result = formatPublishedAt('2026-02-20T12:00:00.000Z', now);
-    expect(result).toBe('Hace 5 días');
+    expect(result).toBe('Hace 5 d\u00edas');
   });
 
   it('returns months when diff is a month or more', () => {

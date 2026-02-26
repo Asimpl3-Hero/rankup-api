@@ -21,6 +21,7 @@ interface MockVideoItem {
   };
   statistics?: {
     viewCount?: string;
+    likeCount?: string;
     commentCount?: string;
   };
 }
@@ -52,6 +53,8 @@ describe('VideosController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
+    delete process.env.MOCK_YOUTUBE_FILE_PATH;
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -59,6 +62,11 @@ describe('VideosController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
     await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
+    delete process.env.MOCK_YOUTUBE_FILE_PATH;
   });
 
   it('/api/videos (GET) returns only the public contract sorted by hype desc', async () => {
@@ -115,6 +123,36 @@ describe('VideosController (e2e)', () => {
     }
   });
 
+  it('applies tutorial multiplier x2 when title includes tutorial', async () => {
+    const tutorialItem = getMockItems().find((item) => {
+      const title = item.snippet?.title?.toLowerCase() ?? '';
+      const hasComments = item.statistics?.commentCount !== undefined;
+      const views = Number(item.statistics?.viewCount ?? '0');
+      return title.includes('tutorial') && hasComments && views > 0;
+    });
+
+    expect(tutorialItem).toBeDefined();
+
+    const likes = Number(tutorialItem?.statistics?.likeCount ?? '0');
+    const comments = Number(tutorialItem?.statistics?.commentCount ?? '0');
+    const views = Number(tutorialItem?.statistics?.viewCount ?? '1');
+    const expectedHype = ((likes + comments) / views) * 2;
+
+    const response = await request(app.getHttpServer())
+      .get('/api/videos')
+      .expect(200);
+    const videos = response.body as VideoResponseContract[];
+
+    const targetVideo = videos.find(
+      (video) =>
+        video.title === (tutorialItem?.snippet?.title ?? '') &&
+        video.author === (tutorialItem?.snippet?.channelTitle ?? ''),
+    );
+
+    expect(targetVideo).toBeDefined();
+    expect(targetVideo?.hype).toBeCloseTo(expectedHype);
+  });
+
   it('applies hype=0 when views are zero', async () => {
     const expectedKeys = getMockItems()
       .filter((item) => Number(item.statistics?.viewCount) === 0)
@@ -142,5 +180,20 @@ describe('VideosController (e2e)', () => {
     for (const video of matchingVideos) {
       expect(video.hype).toBe(0);
     }
+  });
+
+  it('returns 500 when mock file path is invalid', async () => {
+    await app.close();
+    process.env.MOCK_YOUTUBE_FILE_PATH = 'mock/not-found.json';
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    await app.init();
+
+    await request(app.getHttpServer()).get('/api/videos').expect(500);
   });
 });

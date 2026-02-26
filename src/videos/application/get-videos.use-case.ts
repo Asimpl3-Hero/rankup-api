@@ -17,6 +17,8 @@ export class GetVideosUseCase {
 
   private mapToResponse(video: YoutubeVideoItemRaw): VideoResponseDto {
     const title = video.snippet?.title ?? '';
+    const views = this.parseCount(video.statistics?.viewCount);
+    const likes = this.parseCount(video.statistics?.likeCount);
     const commentsRaw = video.statistics?.commentCount;
 
     return {
@@ -26,9 +28,10 @@ export class GetVideosUseCase {
       publishedAt: formatPublishedAt(video.snippet?.publishedAt ?? ''),
       hype: calculateHype({
         title,
-        views: this.parseCount(video.statistics?.viewCount),
-        likes: this.parseCount(video.statistics?.likeCount),
-        comments: commentsRaw === undefined ? null : this.parseCount(commentsRaw),
+        views,
+        likes,
+        comments:
+          commentsRaw === undefined ? null : this.parseCount(commentsRaw),
       }),
     };
   }
